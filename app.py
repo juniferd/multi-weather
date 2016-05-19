@@ -2,8 +2,12 @@ from flask import Flask, render_template,request,jsonify
 from random import randint
 import geoip2.database
 import weather
+import logging
 
 app = Flask(__name__)
+app.config.from_object('config')
+weather.location.set_api_key(app.config['WU_API_KEY'])
+logging.basicConfig(filename='example.log',level=logging.DEBUG)
 
 @app.route("/")
 def home():
@@ -37,7 +41,7 @@ def set_client_ip():
     
     weather.location.set_ip(response.traits.ip_address,latitude,longitude)
     
-    print 'GET CITIES',weather.location.get_cities()
+    logging.debug('GET CITIES %s' % weather.location.get_cities())
 
     res = jsonify(weather.location.get_cities())
 
@@ -46,4 +50,4 @@ def set_client_ip():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run()

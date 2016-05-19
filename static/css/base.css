@@ -73,17 +73,9 @@ color5: #70c1b3; //rgba(112, 193, 179, 100)
         -ms-border-radius: 100px;
         -o-border-radius: 100px;
 }
-.weather-container:nth-child(2n){
-    background: #ffe066;
-}
-.weather-container:nth-child(3n){
-    background: #70c1b3;
-}
-.weather-container:nth-child(4n){
-    background: #247ba0;
-}
+
 .weather-container.active{
-    background: #247ba0;   
+    background: #247ba0 !important;   
 }
 .weather-container > div{
     transform: translateY(25%);
