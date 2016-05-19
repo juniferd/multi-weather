@@ -1,0 +1,10 @@
+cachetools==1.1.6
+Flask==0.10.1
+geoip2==2.3.0
+ipaddr==2.1.11
+itsdangerous==0.24
+Jinja2==2.8
+MarkupSafe==0.23
+maxminddb==1.2.0
+requests==2.10.0
+Werkzeug==0.11.9
