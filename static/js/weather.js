@@ -1,3 +1,8 @@
+var SelectNode = function(){};
+
+MicroEvent.mixin(SelectNode);
+
+var selectNode = new SelectNode();
 
 var WeatherItem = React.createClass({
   getInitialState: function(){
@@ -26,20 +31,15 @@ var WeatherItem = React.createClass({
     
   },
   componentWillUpdate: function(){
-    console.log('updating')
+    //console.log('updating')
     
   },
   componentWillUnmount: function(){
     this._leaveStyle();
-    console.log('unmounting 2', this)
+    
+    console.log('unmounting', this)
   },
-  getStyles: function(){
-
-    var styles = {
-      background: this.state.bgcolor
-    }
-    return styles
-  },
+  
   getClasses: function() {
     var isSelected = this.state.selected
     var isVisible = this.state.visible
@@ -51,17 +51,33 @@ var WeatherItem = React.createClass({
       "weather-container "+activeClass+" "+isVisible
       )
   },
+  setSelected: function(){
+    selectNode.trigger('select',this.refs);
+    this.setState({selected: true})
+    
+  },
+  getIcon: function(conditions){
+    return CONDITIONS[conditions]
+  },
   render: function(){
     var divStyle = {
       backgroundColor: this.props.color_temp
     }
+    var icon = 'meteocon '+this.getIcon(this.props.conditions)
     return (            
-      <div className = {this.getClasses()} ref={this.props.id} style={divStyle}>
+      <div className = {this.getClasses()} 
+        ref={this.props.id} 
+        style={divStyle} 
+        id={this.props.id}
+        onClick = {this.setSelected}
+        >
         <div>
           <div className = "temp">
             {this.props.temp}&deg;F
           </div>
           <div className = "conditions">
+            <span className = {icon}/>
+            <br/>
             {this.props.conditions}
           </div>
           <div className = "location">
@@ -78,11 +94,17 @@ var WeatherItem = React.createClass({
 });
 var WeatherList = React.createClass({
   getInitialState: function() {
+    var w = (Math.floor((window.innerWidth-40) / 220))*220
     return {
       data: [],
       loading: true,
-      selected: ''
+      selected: '',
+      winWidth: w
     };
+  },
+  handleResize: function(){
+    var w = (Math.floor((window.innerWidth-40) / 220))*220
+    this.setState({winWidth: w});
   },
   loadWeather: function(){
     $.ajax({
@@ -115,27 +137,32 @@ var WeatherList = React.createClass({
     }
     return dataArr
   },
-  handleClick: function(e){
-    console.log('clicked',e.target.className)
-    var node = e.target
-    if (e.target.classList.contains('weather-container')){
-      var index = [].slice.call(node.parentNode.children).indexOf(node);
-      this.setSelected(index);    
-    }
-
-  },
-  setSelected: function(index){
-    console.log('select',index)
-    this.setState({selected: "weather-"+index})
-    for (var key in this.refs){
-      this.refs[key].setState({selected:false})
-    }
-    this.refs['weather-'+index].setState({selected:true})
-  },
-  componentDidMount: function(){
+  componentWillMount: function(){
     this.loadWeather();
     this.setState({loading: false})
+    var self = this
+    selectNode.bind('select', function(ref){
+      for (var key in self.refs){
+        self.refs[key].setState({selected:false})
+      }
+    });
+    
     setInterval(this.loadWeather, this.props.pollInterval);
+  },
+  componentDidMount: function(){
+    this.handleResize
+    window.addEventListener('resize', this.handleResize)
+    
+  },
+  componentWillUpdate: function(){
+    
+  },
+  componenetWillUnmount: function(){
+    selectNode.unbind('select',function(){});
+    window.removeEventListener('resize', this.handleResize)
+  },
+  handleClick: function(){
+    console.log('HEY')
   },
 
   render: function(){
@@ -143,13 +170,16 @@ var WeatherList = React.createClass({
     var dataArr=this.prepWeatherData(this.state.data);
     var index = 0
     var self = this;
+    var divStyles = {
+      width: this.state.winWidth
+    }
     if (this.state.loading){
       return (
         <div className="loading">loading...</div>
         );
     } else {
-     var weatherNodes = dataArr.map(function(weather) {
-      //console.log(weather)
+      
+      var weatherNodes = dataArr.map(function(weather) {
       return (
         <WeatherItem 
         temp={weather.temp} 
@@ -163,6 +193,7 @@ var WeatherList = React.createClass({
         id={index}
         ip={weather.key}
         ref={"weather-"+(index++)}
+        
         >
 
         </WeatherItem>
@@ -171,7 +202,7 @@ var WeatherList = React.createClass({
     });
      return (
 
-      <div className="weather-list" onClick={this.handleClick}>
+      <div className="weather-list" style={divStyles}>
         {weatherNodes}
       </div>
       ); 
