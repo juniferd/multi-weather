@@ -1,4 +1,5 @@
 from cachetools import TTLCache
+import uuid
 import time
 import urllib2
 import json
@@ -10,6 +11,7 @@ class Location(object):
     def set_ip(self,ip,lat,lon):
         if ip not in self.cache:
             self.cache[ip] = {}
+            self.cache[ip]['id'] = str(uuid.uuid1())
             self.cache[ip]['time'] = time.clock()
             self.cache[ip]['weather'] = self.get_weather_by_lat_lon(lat,lon)
             self.cache[ip]['colortemp'] = self.get_rgb(self.cache[ip]['weather']['temp'])

@@ -52,7 +52,8 @@ var WeatherItem = React.createClass({
       )
   },
   setSelected: function(){
-    selectNode.trigger('select',this.refs);
+
+    selectNode.trigger('select',this.props.id);
     this.setState({selected: true})
     
   },
@@ -92,9 +93,23 @@ var WeatherItem = React.createClass({
       );
   }
 });
+var WeatherBG = React.createClass({
+  getInitialState: function(){
+    return {
+      wind: 0,
+      icon: ''
+    }
+  },
+  render: function(){
+    var icon = 'meteocon '+this.state.icon
+    return (
+      <span className={icon}/>
+    )
+  }
+});
 var WeatherList = React.createClass({
   getInitialState: function() {
-    var w = (Math.floor((window.innerWidth-40) / 220))*220
+    var w = (Math.floor((window.innerWidth) / 220))*220
     return {
       data: [],
       loading: true,
@@ -103,7 +118,7 @@ var WeatherList = React.createClass({
     };
   },
   handleResize: function(){
-    var w = (Math.floor((window.innerWidth-40) / 220))*220
+    var w = (Math.floor((window.innerWidth) / 220))*220
     this.setState({winWidth: w});
   },
   loadWeather: function(){
@@ -124,7 +139,7 @@ var WeatherList = React.createClass({
     var dataArr = []
     for (var key in data){
       var loc = {}
-      loc['key'] = key
+      loc['key'] = data[key]['id']
       loc['loc'] = data[key]['weather']['city']+', '
         +(data[key]['weather']['state'] ? data[key]['weather']['state'] : data[key]['weather']['country'])
       loc['temp'] = data[key]['weather']['temp']
@@ -141,10 +156,17 @@ var WeatherList = React.createClass({
     this.loadWeather();
     this.setState({loading: false})
     var self = this
-    selectNode.bind('select', function(ref){
+    selectNode.bind('select', function(refid){
       for (var key in self.refs){
         self.refs[key].setState({selected:false})
       }
+      
+      var wkey = 'weather-'+refid
+      var wicon = self.refs[wkey].props['conditions']
+      self.refs['bg'].setState({
+        wind: self.refs[wkey].props['wind'],
+        icon: CONDITIONS[wicon]
+      })
     });
     
     setInterval(this.loadWeather, this.props.pollInterval);
@@ -189,11 +211,9 @@ var WeatherList = React.createClass({
         wind={weather.wind}
         wind_dir={weather.wind_dir}
         color_temp={weather.colortemp}
-        key={index}
-        id={index}
-        ip={weather.key}
-        ref={"weather-"+(index++)}
-        
+        key={weather.key}
+        id={weather.key}
+        ref={"weather-"+(weather.key)}
         >
 
         </WeatherItem>
@@ -201,9 +221,13 @@ var WeatherList = React.createClass({
 
     });
      return (
-
-      <div className="weather-list" style={divStyles}>
-        {weatherNodes}
+      <div>
+        <div id="weather-bg">
+          <WeatherBG ref={'bg'}></WeatherBG>
+        </div>
+        <div className="weather-list" style={divStyles}>
+          {weatherNodes}
+        </div>
       </div>
       ); 
    }
