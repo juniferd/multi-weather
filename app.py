@@ -41,13 +41,26 @@ def set_client_ip():
     
     weather.location.set_ip(response.traits.ip_address,latitude,longitude)
     
-    logging.debug('GET CITIES %s' % weather.location.get_cities())
+    logging.info('GET CITIES %s' % weather.location.get_cities())
 
     res = jsonify(weather.location.get_cities())
 
     return res, 200
 
+@app.route("/api/get_weather_in_city", methods=['GET'])
+def fetch_weather():
+    query = str(request.args.get('query'))
+    logging.debug('FETCHING WEATHER FOR CITY %s' % query)
+    try:
+        city,state = query.split(',')
+        city = city.rstrip()
+        state = state.lstrip()
+        ret = weather.location.set_loc(city,state)
+    except:
+        ret = 'unrecognized'
+    ret = jsonify({'ret':ret})
 
+    return ret
 
 if __name__ == "__main__":
     app.run()

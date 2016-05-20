@@ -18,12 +18,41 @@ class Location(object):
         
         self.cleanup(ip)
 
-    def get_city(self,city):
-        return self.cache[city]
+    def set_loc(self,city,state):
+        # check if location is already in TTLCache
+        ip = str(uuid.uuid1())
+        if not self.check_if_city_state_exists(city,state):
+            # fetch weather from wunderground
+            weather = self.get_weather_by_city_state(city,state)
+            logging.debug('WEATHER:',weather)
+            if weather['temp'] != 'Unknown':
+                self.cache[ip] = {}
+                self.cache[ip]['id'] = ip
+                self.cache[ip]['time'] = time.clock()
+                self.cache[ip]['weather'] = weather
+                self.cache[ip]['colortemp'] = self.get_rgb(self.cache[ip]['weather']['temp'])
+                return 'OK'
+            else:
+                logging.debug('WEATHER UNKNOWN')
+                return 'weather unknown'
+        else:
+            logging.debug('LOCATION ALREADY EXISTS')
+            return 'location exists'
 
 
     def get_cities(self):
         return self.cache
+
+    def check_if_city_state_exists(self,city,state):
+        citystate = (city+state).lower()
+        for loc in self.cache:
+            loc_key_1 = self.cache[loc]['weather']['city']+self.cache[loc]['weather']['state']
+            loc_key_1 = loc_key_1.lower()
+            loc_key_2 = self.cache[loc]['weather']['city']+self.cache[loc]['weather']['country']
+            loc_key_2 = loc_key_2.lower()
+            if citystate == loc_key_1 or citystate == loc_key_2:
+                return True
+        return False
 
     # deletes item from TTLCache if the weather conditions are unknown or if duplicate city/state
     def cleanup(self,ip):
@@ -34,7 +63,7 @@ class Location(object):
             del self.cache[ip]
         # remove duplicate city,state
         for loc in self.cache:
-            loc_key = self.cache[loc]['weather']['city']+self.cache[loc]['weather']['state']
+            loc_key = self.cache[loc]['weather']['city']+self.cache[loc]['weather']['state']+self.cache[loc]['weather']['country']
             if loc_key in locs:
                 logging.debug('DELETING DUP KEY %s' % loc)
                 del self.cache[loc]
@@ -100,4 +129,30 @@ class Location(object):
         except:
             return {'temp':'Unknown'}
 
+    # attempts to get weather by city/state
+    def get_weather_by_city_state(self,city,state):
+        city = city.replace(' ','_')
+        state = state.replace(' ','_')
+        URL = 'http://api.wunderground.com/api/%s/geolookup/conditions/q/%s/%s.json' % (self.api_key,state,city)
+        logging.debug('TRYING TO GET WEATHER BY CITY STATE: %s, %s' % (city,state))
+        try:
+            f = urllib2.urlopen(URL)
+            json_string = f.read()
+            parsed_json = json.loads(json_string)
+            city = str(parsed_json['location']['city'])
+            state = str(parsed_json['location']['state'])
+            country = str(parsed_json['location']['country_name'])
+            temp_f = parsed_json['current_observation']['temp_f']
+            string_w = str(parsed_json['current_observation']['weather'])
+            wind = parsed_json['current_observation']['wind_mph']
+            wind_dir = str(parsed_json['current_observation']['wind_dir'])
+            o_time = str(parsed_json['current_observation']['observation_time'])
+            
+            logging.debug("Current temperature in %s is: %s" % (location, temp_f)) 
+            logging.debug("Current conditions: %s with winds: %s" % (string_w, wind))
+            logging.debug("Local Time: %s" % o_time)
+            f.close()
+            return {'conditions':string_w,'temp':temp_f,'wind':wind,'wind_dir':wind_dir,'time':o_time,'city':city,'state':state,'country':country}
+        except:
+            return {'temp':'Unknown'}
 location = Location()

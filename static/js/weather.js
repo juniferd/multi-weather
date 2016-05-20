@@ -1,8 +1,11 @@
 var SelectNode = function(){};
+var SearchLocation = function(){};
 
 MicroEvent.mixin(SelectNode);
+MicroEvent.mixin(SearchLocation);
 
 var selectNode = new SelectNode();
+var searchLocation = new SearchLocation();
 
 var WeatherItem = React.createClass({
   getInitialState: function(){
@@ -107,6 +110,61 @@ var WeatherBG = React.createClass({
     )
   }
 });
+var Search = React.createClass({
+  getInitialState: function(){
+    return {
+      searchInput: 'invisible',
+      searchIcon: 'visible',
+      searchValue: ''
+    }
+  },
+  shouldComponentUpdate: function(nextProps, nextState){
+      return true
+  },
+  handleSearchVisible: function(){
+    this.refs['searchInput'].value = ''
+    if (this.state.searchInput == 'invisible'){
+      this.setState({searchInput: 'visible'})
+      this.setState({searchIcon: 'invisible'})
+      this.refs['searchInput'].focus(); 
+    } else {
+      this.setState({searchInput: 'invisible'})
+      this.setState({searchIcon: 'visible'})
+    }
+
+  },
+  handleEnter: function(e){
+    
+    if (e.keyCode == 13){
+      var thisVal = e.target.value
+      this.setState({searchValue: thisVal})
+      this.refs['searchInput'].blur()
+      searchLocation.trigger('search', thisVal);
+    }
+  },
+  render: function(){
+
+    var icon = 'fontello icon-search '+this.state.searchIcon
+    var searchClasses = 'search-input '+this.state.searchInput
+    return (
+      <div>
+        <input 
+          className={searchClasses} 
+          ref={'searchInput'} 
+          id={'search-input'}
+          placeholder={'e.g., New York, NY or Paris, France'}
+          
+          onBlur={this.handleSearchVisible}
+          onKeyDown={this.handleEnter}/>
+        <div 
+          className={icon} 
+          ref={'searchIcon'} 
+          id={'search'} 
+          onClick={this.handleSearchVisible}/>
+      </div>
+    )
+  }
+});
 var WeatherList = React.createClass({
   getInitialState: function() {
     var w = (Math.floor((window.innerWidth) / 220))*220
@@ -152,6 +210,21 @@ var WeatherList = React.createClass({
     }
     return dataArr
   },
+  handleSearchLocation: function(thisVal){
+    $.ajax({
+      url: '/api/get_weather_in_city',
+      dataType: 'json',
+      cache: false,
+      data: {query: thisVal},
+      success: function(data){
+        console.log('great success',data)
+        //TODO: trigger messages depending on returned data
+      }.bind(this),
+      error: function(xhr,status,err){
+        console.error('/api/get_weather_in_city',status, err.toString());
+      }.bind(this)
+    });
+  },
   componentWillMount: function(){
     this.loadWeather();
     this.setState({loading: false})
@@ -168,7 +241,9 @@ var WeatherList = React.createClass({
         icon: CONDITIONS[wicon]
       })
     });
-    
+    searchLocation.bind('search', function(searchVal){
+      self.handleSearchLocation(searchVal)
+    });
     setInterval(this.loadWeather, this.props.pollInterval);
   },
   componentDidMount: function(){
@@ -181,6 +256,7 @@ var WeatherList = React.createClass({
   },
   componenetWillUnmount: function(){
     selectNode.unbind('select',function(){});
+    searchLocation.unbind('search',function(){});
     window.removeEventListener('resize', this.handleResize)
   },
   handleClick: function(){
@@ -228,6 +304,9 @@ var WeatherList = React.createClass({
         <div className="weather-list" style={divStyles}>
           {weatherNodes}
         </div>
+        <div className="info">
+          <Search ref={'search'}/>
+        </div>
       </div>
       ); 
    }
@@ -236,6 +315,6 @@ var WeatherList = React.createClass({
 });
 
 ReactDOM.render(
-  <WeatherList url="/api/get_weather" pollInterval={5000}/>, 
+  <WeatherList url="/api/get_weather" pollInterval={500}/>, 
   document.getElementById('content')
   );
