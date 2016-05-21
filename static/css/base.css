@@ -58,7 +58,7 @@ color5: #70c1b3; //rgba(112, 193, 179, 100)
     
 }
 #content{
-    overflow-y: auto;
+    overflow-y: hidden;
     background: rgba(42,39,53,1);
     background: -moz-linear-gradient(-45deg, rgba(42,39,53,1) 0%, rgba(58,60,71,1) 100%);
     background: -webkit-gradient(left top, right bottom, color-stop(0%, rgba(42,39,53,1)), color-stop(100%, rgba(58,60,71,1)));
@@ -70,10 +70,16 @@ color5: #70c1b3; //rgba(112, 193, 179, 100)
     color: #fff;
     position: absolute;
     left: 0;
-    right: 0;
+    right: -20px;
     top: 0;
     bottom: 0;
     
+}
+#content > div{
+    position: relative;
+    overflow-y: scroll;
+    margin-right: -20px;
+    padding-right: 20px;
 }
 .loading{
     margin-top: 40px;
@@ -219,4 +225,24 @@ div.info input#search-input:focus{
 .invisible{
     opacity: 0;
 
+}
+@media (max-width: 767px) {
+    div.info{
+        width: 100%;
+        margin-right:-50%;
+    }
+    div.info input#search-input{
+        width: 100%;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  
+}
+
+@media (min-width: 992px) and (max-width: 1199px) {
+  
+}
+@media (min-width: 1200px) {
+  
 }
