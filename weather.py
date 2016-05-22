@@ -57,18 +57,23 @@ class Location(object):
     # deletes item from TTLCache if the weather conditions are unknown or if duplicate city/state
     def cleanup(self,ip):
         locs = {}
+        
         # remove unknown weather
         if self.cache[ip]['weather']['temp'] == 'Unknown':
             logging.debug('DELETING UNKNOWN CONDITIONS %s' % ip)
             del self.cache[ip]
         # remove duplicate city,state
         for loc in self.cache:
-            loc_key = self.cache[loc]['weather']['city']+self.cache[loc]['weather']['state']+self.cache[loc]['weather']['country']
-            if loc_key in locs:
-                logging.debug('DELETING DUP KEY %s' % loc)
-                del self.cache[loc]
-            else:
-                locs[loc_key] = loc_key
+            try:
+                loc_key = self.cache[loc]['weather']['city']+self.cache[loc]['weather']['state']+self.cache[loc]['weather']['country']
+                if loc_key in locs:
+                    logging.debug('DELETING DUP KEY %s' % loc)
+                    del self.cache[loc]
+                else:
+                    locs[loc_key] = loc_key
+            except:
+                loc_key = ''
+            
 
     # this will return an rgb value to match temperature (blue for cold, red for hot)
     def get_rgb(self,temp):
@@ -78,7 +83,10 @@ class Location(object):
         maxtemp, mintemp = (90,30)
         right_r, right_g, right_b = (242,95,92)
         left_r, left_g, left_b = (36,123,160)
-        temp = float(temp)
+        try:
+            temp = float(temp)
+        except:
+            temp = 0
 
         if temp >= maxtemp:
             r = right_r

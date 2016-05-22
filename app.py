@@ -1,4 +1,5 @@
 from flask import Flask, render_template,request,jsonify
+from werkzeug.contrib.fixers import ProxyFix
 from random import randint
 import geoip2.database
 import weather
@@ -6,8 +7,9 @@ import logging
 
 app = Flask(__name__)
 app.config.from_object('config')
+app.wsgi_app = ProxyFix(app.wsgi_app)
 weather.location.set_api_key(app.config['WU_API_KEY'])
-logging.basicConfig(filename='example.log',level=logging.DEBUG)
+logging.basicConfig(level=logging.DEBUG)
 
 @app.route("/")
 def home():
@@ -16,9 +18,12 @@ def home():
 @app.route("/api/get_weather", methods=['GET'])
 def set_client_ip():
     reader = geoip2.database.Reader('db/GeoLite2-City.mmdb')
-    
+    client_ip = request.environ['REMOTE_ADDR']
+    logging.debug('GET LOCATION FOR %s' % client_ip)
     try:
-        response = reader.city(request.environ['REMOTE_ADDR'])
+        
+        response = reader.city(client_ip)
+        
     except:
         randLoc = [
             '128.101.101.101',
@@ -41,7 +46,7 @@ def set_client_ip():
     
     weather.location.set_ip(response.traits.ip_address,latitude,longitude)
     
-    logging.info('GET CITIES %s' % weather.location.get_cities())
+    #logging.info('GET CITIES %s' % weather.location.get_cities())
 
     res = jsonify(weather.location.get_cities())
 
@@ -61,6 +66,12 @@ def fetch_weather():
     ret = jsonify({'ret':ret})
 
     return ret
+@app.errorhandler(404)
+def page_not_found(e):
+    logging.debug(request.headers)
+    return render_template('404.html')
 
 if __name__ == "__main__":
-    app.run()
+    app.run(
+        port=5001
+    )

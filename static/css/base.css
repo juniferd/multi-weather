@@ -58,7 +58,7 @@ color5: #70c1b3; //rgba(112, 193, 179, 100)
     
 }
 #content{
-    overflow-y: hidden;
+    overflow-y: auto;
     background: rgba(42,39,53,1);
     background: -moz-linear-gradient(-45deg, rgba(42,39,53,1) 0%, rgba(58,60,71,1) 100%);
     background: -webkit-gradient(left top, right bottom, color-stop(0%, rgba(42,39,53,1)), color-stop(100%, rgba(58,60,71,1)));
@@ -68,7 +68,10 @@ color5: #70c1b3; //rgba(112, 193, 179, 100)
     background: linear-gradient(135deg, rgba(42,39,53,1) 0%, rgba(58,60,71,1) 100%);
     filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#2a2735', endColorstr='#3a3c47', GradientType=1 );
     color: #fff;
-    position: absolute;
+    box-sizing: content-box;
+    position: fixed;
+    width: 100%;
+    height: 100%;
     left: 0;
     right: -20px;
     top: 0;
@@ -77,9 +80,7 @@ color5: #70c1b3; //rgba(112, 193, 179, 100)
 }
 #content > div{
     position: relative;
-    overflow-y: scroll;
-    margin-right: -20px;
-    padding-right: 20px;
+    
 }
 .loading{
     margin-top: 40px;

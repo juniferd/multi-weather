@@ -315,6 +315,6 @@ var WeatherList = React.createClass({
 });
 
 ReactDOM.render(
-  <WeatherList url="/api/get_weather" pollInterval={500}/>, 
+  <WeatherList url="/api/get_weather" pollInterval={5000}/>, 
   document.getElementById('content')
   );
