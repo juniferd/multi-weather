@@ -1,9 +1,10 @@
-from flask import Flask, render_template,request,jsonify
+from flask import Flask, render_template,request,jsonify,Response
 from werkzeug.contrib.fixers import ProxyFix
 from random import randint
 import geoip2.database
 import weather
 import logging
+import json
 
 app = Flask(__name__)
 app.config.from_object('config')
@@ -23,7 +24,7 @@ def set_client_ip():
     try:
         
         response = reader.city(client_ip)
-        
+        status=200
     except:
         randLoc = [
             '128.101.101.101',
@@ -40,6 +41,7 @@ def set_client_ip():
         ]
         rnum = randint(0,10)
         response = reader.city(randLoc[rnum])
+        status = 202
         
     latitude = float("{0:.1f}".format(response.location.latitude))
     longitude = float("{0:.1f}".format(response.location.longitude))
@@ -48,9 +50,9 @@ def set_client_ip():
     
     #logging.info('GET CITIES %s' % weather.location.get_cities())
 
-    res = jsonify(weather.location.get_cities())
+    res = Response(response=json.dumps(weather.location.get_cities()),status=status)
 
-    return res, 200
+    return res
 
 @app.route("/api/get_weather_in_city", methods=['GET'])
 def fetch_weather():

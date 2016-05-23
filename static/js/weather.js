@@ -165,9 +165,32 @@ var Search = React.createClass({
     )
   }
 });
+var WMessage = React.createClass({
+  getDefaultProps: function(){
+    return {
+      delay: 3000
+    }
+  },
+  getInitialState: function(){
+    return {
+      visible: false,
+      msg: null
+    }
+  },
+  render: function(){
+    var msg = this.state.msg ? this.state.msg : ''
+    
+    return (
+      <div>
+        <p>{msg}</p>
+      </div>
+    )
+  }
+});
 var WeatherList = React.createClass({
   getInitialState: function() {
-    var w = (Math.floor((window.innerWidth) / 220))*220
+    var numNodesPerRow = Math.floor(window.innerWidth/220)
+    var w = numNodesPerRow*220
     return {
       data: [],
       loading: true,
@@ -175,17 +198,39 @@ var WeatherList = React.createClass({
       winWidth: w
     };
   },
-  handleResize: function(){
-    var w = (Math.floor((window.innerWidth) / 220))*220
+  setWinWidth: function(nodeCount){
+    var numNodesPerRow = Math.floor(window.innerWidth/220)
+    var w = nodeCount >= numNodesPerRow ? numNodesPerRow*220 : nodeCount*220
     this.setState({winWidth: w});
+  },
+  handleResize: function(){
+    var nodeCount = 0
+    for (var key in this.refs){
+      if (key.startsWith('weather-')){
+        nodeCount++
+      }
+    }
+    this.setWinWidth(nodeCount)
+  },
+  setMessage: function(msg){
+    this.refs['message'].setState({msg: msg});
   },
   loadWeather: function(){
     $.ajax({
       url: this.props.url,
       dataType: 'json',
       cache: false,
-      success: function(data){
+      success: function(data, status, xhr){
         this.setState({data:data});
+        var thisCount = 0
+        for (var key in data){
+          thisCount++
+        }
+        this.setWinWidth(thisCount)
+        if (xhr.status == '202'){
+          //this.setMessage('Could not find your location')
+          //TODO how to update this without constantly looping
+        }
       }.bind(this),
       error: function(xhr, status, err){
         console.error(this.props.url, status, err.toString());
@@ -208,6 +253,7 @@ var WeatherList = React.createClass({
       loc['colortemp'] = data[key]['colortemp']
       dataArr.push(loc)
     }
+    
     return dataArr
   },
   handleSearchLocation: function(thisVal){
@@ -227,7 +273,8 @@ var WeatherList = React.createClass({
   },
   componentWillMount: function(){
     this.loadWeather();
-    this.setState({loading: false})
+    this.setState({loading: false});
+
     var self = this
     selectNode.bind('select', function(refid){
       for (var key in self.refs){
@@ -244,6 +291,7 @@ var WeatherList = React.createClass({
     searchLocation.bind('search', function(searchVal){
       self.handleSearchLocation(searchVal)
     });
+    
     setInterval(this.loadWeather, this.props.pollInterval);
   },
   componentDidMount: function(){
@@ -252,7 +300,7 @@ var WeatherList = React.createClass({
     
   },
   componentWillUpdate: function(){
-    
+
   },
   componenetWillUnmount: function(){
     selectNode.unbind('select',function(){});
@@ -294,8 +342,8 @@ var WeatherList = React.createClass({
 
         </WeatherItem>
         );
-
     });
+
      return (
       <div>
         <div id="weather-bg">
@@ -306,6 +354,9 @@ var WeatherList = React.createClass({
         </div>
         <div className="info">
           <Search ref={'search'}/>
+        </div>
+        <div className="msg">
+          <WMessage ref={'message'} delay={3000}/>
         </div>
       </div>
       ); 

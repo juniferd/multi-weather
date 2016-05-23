@@ -41,14 +41,23 @@ class Location(object):
 
 
     def get_cities(self):
-        return self.cache
+        scrubbed_cache = {}
+        ind = 0
+        for item in self.cache:
+            scrubbed_cache[ind] = {}
+            scrubbed_cache[ind] = self.cache[item]
+            ind += 1
+        return scrubbed_cache
 
     def check_if_city_state_exists(self,city,state):
         citystate = (city+state).lower()
         for loc in self.cache:
-            loc_key_1 = self.cache[loc]['weather']['city']+self.cache[loc]['weather']['state']
+            l_city = str(self.cache[loc]['weather']['city'])
+            l_state = str(self.cache[loc]['weather']['state'])
+            l_country = str(self.cache[loc]['weather']['country'])
+            loc_key_1 = l_city+l_state
             loc_key_1 = loc_key_1.lower()
-            loc_key_2 = self.cache[loc]['weather']['city']+self.cache[loc]['weather']['country']
+            loc_key_2 = l_city+l_country
             loc_key_2 = loc_key_2.lower()
             if citystate == loc_key_1 or citystate == loc_key_2:
                 return True
@@ -65,7 +74,10 @@ class Location(object):
         # remove duplicate city,state
         for loc in self.cache:
             try:
-                loc_key = self.cache[loc]['weather']['city']+self.cache[loc]['weather']['state']+self.cache[loc]['weather']['country']
+                l_city = str(self.cache[loc]['weather']['city'])
+                l_state = str(self.cache[loc]['weather']['state'])
+                l_country = str(self.cache[loc]['weather']['country'])
+                loc_key = l_city+l_state+l_country
                 if loc_key in locs:
                     logging.debug('DELETING DUP KEY %s' % loc)
                     del self.cache[loc]
@@ -73,7 +85,6 @@ class Location(object):
                     locs[loc_key] = loc_key
             except:
                 loc_key = ''
-            
 
     # this will return an rgb value to match temperature (blue for cold, red for hot)
     def get_rgb(self,temp):
