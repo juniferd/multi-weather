@@ -1,11 +1,14 @@
 var SelectNode = function(){};
 var SearchLocation = function(){};
+var SelectAbout = function(){};
 
 MicroEvent.mixin(SelectNode);
 MicroEvent.mixin(SearchLocation);
+MicroEvent.mixin(SelectAbout);
 
 var selectNode = new SelectNode();
 var searchLocation = new SearchLocation();
+var selectAbout = new SelectAbout();
 
 var WeatherItem = React.createClass({
   getInitialState: function(){
@@ -147,7 +150,7 @@ var Search = React.createClass({
     var icon = 'fontello icon-search '+this.state.searchIcon
     var searchClasses = 'search-input '+this.state.searchInput
     return (
-      <div>
+      <div className='search-container'>
         <input 
           className={searchClasses} 
           ref={'searchInput'} 
@@ -183,6 +186,91 @@ var WMessage = React.createClass({
     return (
       <div>
         <p>{msg}</p>
+      </div>
+    )
+  }
+});
+var Github = React.createClass({
+  render: function(){
+    var url = 'https://github.com/juniferd/multi-weather'
+    return (
+        <div>
+        <a href={url} target={'_blank'}><div className={this.props.icon} id={'github'}/></a>
+        </div>
+    )
+  }
+});
+var About = React.createClass({
+  getInitialState: function(){
+    return {
+      aboutIcon: ''
+    }
+  },
+  handleClick: function(){
+    if (this.state.aboutIcon == 'selected') {
+      this.setState({aboutIcon: ''})
+      selectAbout.trigger('select', 'invisible');
+    } else {
+      this.setState({aboutIcon: 'selected'});
+      selectAbout.trigger('select', 'visible');
+    }
+    
+  },
+  componentWillMount: function(){
+    var self = this;
+    selectAbout.bind('close', function(t){
+      self.setState({aboutIcon: t})
+    });
+  },
+  componentWillUnmount: function(){
+    selectNode.unbind('close', function(){})
+  },
+  render: function(){
+    var iconClass = 'fontello icon-info-circled '+this.state.aboutIcon
+    return (
+      <div 
+      className={iconClass} 
+      id={'about'} 
+      ref={'about'}
+      onClick={this.handleClick}/>
+    )
+  }
+});
+var Modal = React.createClass({
+  getInitialState: function(){
+    return {
+      isVisible: 'invisible'
+    }
+  },
+  componentWillMount: function(){
+    var self = this;
+    selectAbout.bind('select', function(t){
+      self.setState({isVisible: t})
+    });
+  },
+  componentWillUnmount: function(){
+    selectAbout.unbind('select', function(){});
+  },
+  handleClick: function(){
+    var self = this;
+    if (this.state.isVisible == 'invisible'){
+      this.setState({isVisible: 'visible'})
+      selectAbout.trigger('close', 'selected')
+    } else {
+      this.setState({isVisible: 'invisible'})
+      selectAbout.trigger('close', '')
+    }
+  },
+  render: function(){
+    var modalClass = 'modal '+this.state.isVisible;
+    var link = 'https://www.wunderground.com/weather/api';
+    var meteocon = 'http://www.alessioatzeni.com/meteocons/';
+    return (
+      <div className={modalClass}>
+        <div className={'close-button'} ref={'close'} onClick={this.handleClick}/>
+        <p>This app displays current conditions based on locations of connected users</p>
+        <p>Weather data from <a href={link} target={'_blank'}>wunderground</a></p>
+        <p>Meteocon weather icons from <a href={meteocon} target={'_blank'}>here</a></p>
       </div>
     )
   }
@@ -353,10 +441,15 @@ var WeatherList = React.createClass({
           {weatherNodes}
         </div>
         <div className="info">
+          <Github ref={'github'} icon={'fontello icon-github'}/>
           <Search ref={'search'}/>
+          <About ref={'about'} icon={'fontello icon-info-circled'}/>
         </div>
         <div className="msg">
           <WMessage ref={'message'} delay={3000}/>
+        </div>
+        <div>
+          <Modal ref={'modal'}/>
         </div>
       </div>
       ); 

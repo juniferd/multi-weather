@@ -181,15 +181,37 @@ div.info{
     margin-right: -200px;
     z-index: 100;
 }
-div.info #search{
+div.info #search,
+div.info #github,
+div.info #about{
     font-size: 2em;
     line-height: 1.5em;
-    opacity: 0.25;
+    opacity: 0.4;
     margin: 0 auto;
     width: 50px;
     height: 50px;
 }
-div.info #search:hover{
+div.info #github{
+    position: absolute;
+    bottom: 0;
+    left: 100px;
+    font-size:1.5em;
+    line-height: 2em;
+    z-index: 50;
+    color: #fff;
+}
+div.info #about{
+    position: absolute;
+    bottom: 0;
+    right: 100px;
+    font-size:1.5em;
+    line-height: 2em;
+    z-index: 50;
+}
+
+div.info #search:hover,
+div.info #github:hover,
+div.info #about:hover{
     cursor: pointer;
     opacity: 1;
     transform: scale(1.25,1.25);
@@ -212,6 +234,8 @@ div.info input#search-input{
     border-radius: 25px;
     width: 360px;
     margin-bottom: 10px;
+    z-index: 101;
+    position: relative;
 }
 div.info input#search-input.invisible{
     width: 0;
@@ -220,6 +244,9 @@ div.info input#search-input:focus{
     outline: none;
     border: 1px solid #fff;
 }
+div.info #about.selected{
+    opacity: 1;
+}
 .visible{
     opacity: 1;
 
@@ -227,6 +254,69 @@ div.info input#search-input:focus{
 .invisible{
     opacity: 0;
 
+}
+div.modal{
+    background: #C4C1CE;
+    color: rgba(42,39,53,1);
+    position: fixed;
+    padding: 20px;
+    width: 300px;
+    min-height: 100px;
+    z-index: 200;
+    overflow: visible;
+    top: 50%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-50%);
+        -webkit-transform: translateX(-50%) translateY(-50%);
+        -moz-transform: translateX(-50%) translateY(-50%);
+        -ms-transform: translateX(-50%) translateY(-50%);
+        -o-transform: translateX(-50%) translateY(-50%);
+    box-shadow: 0 0 20px rgba(0,0,0,.15);
+        -webkit-box-shadow: 0 0 20px rgba(0,0,0,.15);
+        -moz-box-shadow: 0 0 20px rgba(0,0,0,.15);
+        -ms-box-shadow: 0 0 20px rgba(0,0,0,.15);
+        -o-box-shadow: 0 0 20px rgba(0,0,0,.15);
+}
+div.modal p{
+    font-weight: 500;
+}
+div.modal p a{
+    font-weight: 600;
+    color: #247ba0;
+}
+div.modal p a:hover{
+    color: #70c1b3;
+}
+div.modal.invisible{
+    z-index: 1;
+}
+div.modal.visible{
+    z-index: 200;
+}
+div.modal .close-button{
+    position: absolute;
+    right: -10px;
+    top: -10px;
+    color: #fff;
+    background: #666;
+    width: 20px;
+    height: 20px;
+    border-radius: 10px;
+        -webkit-border-radius: 10px;
+        -moz-border-radius: 10px;
+        -ms-border-radius: 10px;
+        -o-border-radius: 10px;
+    text-align: center;
+    line-height: 20px;
+}
+div.modal .close-button:after{
+    content: '\00D7';
+    font-size: 18px;
+}
+div.modal .close-button:hover{
+    cursor: pointer;
+    background: #fff;
+    color: #666;
 }
 @media (max-width: 767px) {
     div.info{
