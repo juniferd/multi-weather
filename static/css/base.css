@@ -245,7 +245,7 @@ div.info input#search-input:focus{
     border: 1px solid #fff;
 }
 div.info #about.selected{
-    opacity: 1;
+    
 }
 .visible{
     opacity: 1;
@@ -317,6 +317,19 @@ div.modal .close-button:hover{
     cursor: pointer;
     background: #fff;
     color: #666;
+}
+div.modal-bg{
+    background: rgba(0,0,0,.7);
+    position: fixed;
+    z-index: 200;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    right: 0;
+}
+div.modal-bg.invisible{
+    z-index:-1;
+
 }
 @media (max-width: 767px) {
     div.info{

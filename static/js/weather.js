@@ -156,7 +156,6 @@ var Search = React.createClass({
           ref={'searchInput'} 
           id={'search-input'}
           placeholder={'e.g., New York, NY or Paris, France'}
-          
           onBlur={this.handleSearchVisible}
           onKeyDown={this.handleEnter}/>
         <div 
@@ -223,7 +222,7 @@ var About = React.createClass({
     });
   },
   componentWillUnmount: function(){
-    selectNode.unbind('close', function(){})
+    selectAbout.unbind('close', function(){})
   },
   render: function(){
     var iconClass = 'fontello icon-info-circled '+this.state.aboutIcon
@@ -263,14 +262,18 @@ var Modal = React.createClass({
   },
   render: function(){
     var modalClass = 'modal '+this.state.isVisible;
+    var modalBgClass = 'modal-bg '+this.state.isVisible;
     var link = 'https://www.wunderground.com/weather/api';
     var meteocon = 'http://www.alessioatzeni.com/meteocons/';
     return (
-      <div className={modalClass}>
-        <div className={'close-button'} ref={'close'} onClick={this.handleClick}/>
-        <p>This app displays current conditions based on locations of connected users</p>
-        <p>Weather data from <a href={link} target={'_blank'}>wunderground</a></p>
-        <p>Meteocon weather icons from <a href={meteocon} target={'_blank'}>here</a></p>
+      <div>
+        <div className={modalBgClass} ref={'modal-bg'} onClick={this.handleClick}/>
+        <div className={modalClass}>
+          <div className={'close-button'} ref={'close'} onClick={this.handleClick}/>
+          <p>This app displays current conditions based on locations of connected users</p>
+          <p>Weather data from <a href={link} target={'_blank'}>wunderground</a></p>
+          <p>Meteocon weather icons from <a href={meteocon} target={'_blank'}>here</a></p>
+        </div>
       </div>
     )
   }
